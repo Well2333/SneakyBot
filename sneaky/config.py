@@ -9,6 +9,7 @@ class Config(BaseSettings):
     at_all: bool = False
     flash_enable: bool = False
     recall_enable: bool = False
+    recall_image_only: bool = False
     send_private: Sequence[int]
     send_group: Sequence[int]
 

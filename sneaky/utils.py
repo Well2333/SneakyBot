@@ -37,19 +37,22 @@ async def _get_sender_info(bot: Bot, user_id: int, group_id: int = 0):
     return group_name, user_name
 
 
-
 async def get_info_header(bot: Bot, infotype: str, user_id: int, group_id: int = 0):
     """构造消息头"""
     group_name, user_name = await _get_sender_info(bot, user_id, group_id)
     return f"{infotype} -- {datetime.now().strftime('%H:%M:%S')}\n{group_name}({group_id})\n{user_name}({user_id})"
 
+
 async def get_image_link(bot: Bot, event: Event):
-    with contextlib.suppress(ActionFailed):
-        return (await bot.get_image(
-            file=str(event.get_message()).split("file=")[1].split(".image")[0]
-            + ".image"
-        ))["url"]
-    return "获取图片链接失败"
+    try:
+        return (
+            await bot.get_image(
+                file=str(event.get_message()).split("file=")[1].split(".image")[0]
+                + ".image"
+            )
+        )["url"]
+    except ActionFailed as e:
+        return f"获取图片链接失败\n{e}"
 
 
 async def _send_msg_msg(bot: Bot, msgs: List[Message]):
