@@ -1,5 +1,7 @@
+from pathlib import Path
 from typing import Sequence
 
+from nonebot.log import logger
 from pydantic import BaseSettings, validator
 
 
@@ -12,6 +14,7 @@ class Config(BaseSettings):
     recall_image_only: bool = False
     send_private: Sequence[int]
     send_group: Sequence[int]
+    save_path: Path = Path("sneakydata")
 
     @validator("send_private")
     def private_check(cls, v):
@@ -32,6 +35,14 @@ class Config(BaseSettings):
             return v
         else:
             raise ValueError("SEND_PRIVATE 和 SEND_GROUP 中至少应有一项不为空")
+
+    @validator("save_path")
+    def path_check(cls, v):
+        if Path(v).is_absolute():
+            logger.warning(f"检测到 SAVE_PATH 为绝对路径 -> {v}")
+        Path(v, "log").mkdir(755, True, True)
+        Path(v, "cache").mkdir(755, True, True)
+        return Path(v)
 
     class Config:
         extra = "ignore"

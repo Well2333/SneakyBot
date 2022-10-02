@@ -1,8 +1,9 @@
 import contextlib
 from datetime import date, datetime
+from pathlib import Path
 from typing import List
 
-from nonebot.adapters.onebot.v11 import Bot, Message, Event
+from nonebot.adapters.onebot.v11 import Bot, Event, Message
 from nonebot.adapters.onebot.v11.exception import ActionFailed
 from nonebot.log import logger
 
@@ -10,7 +11,7 @@ from . import config
 
 
 async def _get_sender_info(bot: Bot, user_id: int, group_id: int = 0):
-    """获取用户信息"""
+    """获取用户的昵称信息"""
     group_name = None
     user_name = None
     if group_id:
@@ -38,12 +39,13 @@ async def _get_sender_info(bot: Bot, user_id: int, group_id: int = 0):
 
 
 async def get_info_header(bot: Bot, infotype: str, user_id: int, group_id: int = 0):
-    """构造消息头"""
+    """构造消息头, 包含事件类型, 时间和发送者信息"""
     group_name, user_name = await _get_sender_info(bot, user_id, group_id)
     return f"{infotype} -- {datetime.now().strftime('%H:%M:%S')}\n{group_name}({group_id})\n{user_name}({user_id})"
 
 
 async def get_image_link(bot: Bot, event: Event):
+    """获取图片链接"""
     try:
         return (
             await bot.get_image(
@@ -67,7 +69,7 @@ async def _send_msg_msg(bot: Bot, msgs: List[Message]):
 
 
 async def _send_foword_msg(bot: Bot, msgs: List[Message]):
-    """通过群聊发送合并转发消息"""
+    """通过群聊和私聊发送合并转发消息"""
     f_msg = [
         {
             "type": "node",
@@ -84,13 +86,17 @@ async def _send_foword_msg(bot: Bot, msgs: List[Message]):
 
 
 async def _save_to_local(msgs: List[Message]):
-    with open("sneak_log.txt", mode="a", encoding="utf-8") as f:
-        f.write(f"\n===== {date.today()} =====\n")
+    """将消息保存至本地"""
+    with open(
+        Path(config.save_path, f"log/{date.today()}.log"), mode="a", encoding="utf-8"
+    ) as f:
         for m in msgs:
             f.write(str(m).rstrip("\n") + "\n")
+        f.write("\n")
 
 
 async def send_msg(bot: Bot, msgs: List[Message]):
+    """将消息保存至本地并根据用户配置的渠道发送消息"""
     await _save_to_local(msgs)
     if config.foword_msg:
         await _send_foword_msg(bot, msgs)

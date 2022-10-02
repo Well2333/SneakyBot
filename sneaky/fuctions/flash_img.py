@@ -3,17 +3,16 @@ import contextlib
 from nonebot import on_message
 from nonebot.adapters.onebot.v11 import (
     Bot,
-    Event,
     GroupMessageEvent,
+    MessageEvent,
     PrivateMessageEvent,
 )
-from nonebot.adapters.onebot.v11.exception import ActionFailed
 from nonebot.adapters.onebot.v11.message import Message
 
-from ..utils import get_info_header, send_msg, get_image_link
+from ..utils import get_image_link, get_info_header, send_msg
 
 
-async def _checker(bot: Bot, event: Event) -> bool:
+async def _checker(bot: Bot, event: MessageEvent) -> bool:
     msg = str(event.get_message())
     return "type=flash" in msg and "CQ:image" in msg
 
