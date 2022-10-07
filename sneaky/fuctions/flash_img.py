@@ -1,5 +1,3 @@
-import contextlib
-
 from nonebot import on_message
 from nonebot.adapters.onebot.v11 import (
     Bot,
@@ -9,7 +7,7 @@ from nonebot.adapters.onebot.v11 import (
 )
 from nonebot.adapters.onebot.v11.message import Message
 
-from ..utils import get_image_link, get_info_header, send_msg
+from ..utils import get_info_header, send_msg, get_image_link
 
 
 async def _checker(bot: Bot, event: MessageEvent) -> bool:
@@ -29,7 +27,7 @@ async def _(bot: Bot, event: GroupMessageEvent):
         [
             Message(await get_info_header(bot, "闪照", event.user_id, event.group_id)),
             Message(msg),
-            Message(await get_image_link(bot, event)),
+            *(await get_image_link(bot, msg)),
         ],
     )
 
@@ -43,6 +41,6 @@ async def _(bot: Bot, event: PrivateMessageEvent):
         [
             Message(await get_info_header(bot, "闪照", event.user_id)),
             Message(msg),
-            Message(await get_image_link(bot, event)),
+            *(await get_image_link(bot, msg)),
         ],
     )

@@ -7,7 +7,7 @@ from nonebot.adapters.onebot.v11.message import Message
 from nonebot.plugin import on_notice
 
 from .. import config
-from ..utils import get_info_header, send_msg
+from ..utils import get_info_header, send_msg, get_image_link
 
 
 def check_msg(msg: str):
@@ -32,6 +32,7 @@ async def _(bot: Bot, event: GroupRecallNoticeEvent):
                     await get_info_header(bot, "撤回", event.user_id, event.group_id)
                 ),
                 Message(msg),
+                *(await get_image_link(bot, msg)),
             ],
         )
 
@@ -42,5 +43,9 @@ async def _(bot: Bot, event: FriendRecallNoticeEvent):
     if check_msg(str(msg)):
         await send_msg(
             bot,
-            [Message(await get_info_header(bot, "撤回", event.user_id)), Message(msg)],
+            [
+                Message(await get_info_header(bot, "撤回", event.user_id)),
+                Message(msg),
+                *(await get_image_link(bot, msg)),
+            ],
         )

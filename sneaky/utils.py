@@ -1,7 +1,8 @@
 import contextlib
 from datetime import date, datetime
 from pathlib import Path
-from typing import List
+from typing import List, Union
+import re
 
 from nonebot.adapters.onebot.v11 import Bot, Event, Message
 from nonebot.adapters.onebot.v11.exception import ActionFailed
@@ -44,17 +45,15 @@ async def get_info_header(bot: Bot, infotype: str, user_id: int, group_id: int =
     return f"{infotype} -- {datetime.now().strftime('%H:%M:%S')}\n{group_name}({group_id})\n{user_name}({user_id})"
 
 
-async def get_image_link(bot: Bot, event: Event):
+async def get_image_link(bot: Bot, msg: Union[str,Message]):
     """获取图片链接"""
-    try:
-        return (
-            await bot.get_image(
-                file=str(event.get_message()).split("file=")[1].split(".image")[0]
-                + ".image"
-            )
-        )["url"]
-    except ActionFailed as e:
-        return f"获取图片链接失败\n{e}"
+    imgs = []
+    for file in re.findall("file=[^.]*.image", str(msg)):
+        try:
+            imgs.append((await bot.get_image(file=file[5:]))["url"])
+        except ActionFailed as e:
+            imgs.append(f"获取图片链接失败\n{e}")
+    return imgs
 
 
 async def _send_msg_msg(bot: Bot, msgs: List[Message]):
@@ -97,6 +96,7 @@ async def _save_to_local(msgs: List[Message]):
 
 async def send_msg(bot: Bot, msgs: List[Message]):
     """将消息保存至本地并根据用户配置的渠道发送消息"""
+    
     await _save_to_local(msgs)
     if config.foword_msg:
         await _send_foword_msg(bot, msgs)

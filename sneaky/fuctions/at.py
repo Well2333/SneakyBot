@@ -4,19 +4,19 @@ from nonebot.plugin import on_message
 from nonebot.rule import to_me
 
 from .. import config
-from ..utils import get_info_header, send_msg
+from ..utils import get_info_header, send_msg, get_image_link
 
 at_tome = on_message(rule=to_me(), block=False)
 
 
 @at_tome.handle()
 async def _(bot: Bot, event: GroupMessageEvent):
-    event.user_id
     await send_msg(
         bot,
         [
             Message(await get_info_header(bot, "at个人", event.user_id, event.group_id)),
             event.get_message(),
+            *(await get_image_link(bot, event.get_message())),
         ],
     )
 
@@ -38,5 +38,6 @@ async def _(bot: Bot, event: GroupMessageEvent):
         [
             Message(await get_info_header(bot, "at全体", event.user_id, event.group_id)),
             event.get_message(),
+            *(await get_image_link(bot, event.get_message())),
         ],
     )

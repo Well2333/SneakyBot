@@ -1,6 +1,6 @@
 [tool.poetry]
 name = "sneaky-bot"
-version = "0.1.1"
+version = "0.1.2"
 description = "A robot that saves and forward several kinds of information received in QQ (such as flash images), based on NoneBot2"
 authors = ["Well404 <well_404@outlook.com>"]
 license = "AGPL-3.0-or-later"
